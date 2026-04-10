@@ -1,8 +1,9 @@
 const { title } = require('process');
-const { createTask } = require('../models/taskModel');
+const { createTask } = require('../models/taskModels');
 
 let tasks = [];
 let idCounter = 1;
+const getTasks = () => tasks;
 
 // Criar
 const addTask= (title) => {
@@ -33,5 +34,5 @@ module.exports = {
     addTask,
     getTasks,
     updateTask,
-    deleteTask,
+    deleteTask
 }

@@ -1,6 +1,4 @@
-
-
-const taskController = require('../ontrollers/taskControllers');
+const taskController = require('../controllers/taskControllers');
 
 module.exports = (req, res) => {
     const url = req.url;
