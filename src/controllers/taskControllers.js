@@ -1,80 +1,88 @@
-const { json } = require('node:stream/consumers');
 const taskService = require('../services/taskServices');
 
-// Função auxiliar para ler body
+// Função auxiliar para ler o corpo da requisição (Body)
 const getRequestBody = (req) => {
     return new Promise((resolve, reject) => {
-            let body = ''; 
-
-
-            req.on('data', chunk => {
-                body += chunk.toString();
-            });
-            
-            req.on('end', () => {
-                resolve(JSON.parse(body));
-            });
-
+        let body = ''; 
+        req.on('data', chunk => {
+            body += chunk.toString();
         });
-
+        req.on('end', () => {
+            try {
+                resolve(JSON.parse(body));
+            } catch (e) {
+                resolve({}); // Evita quebrar se o JSON vier vazio
+            }
+        });
+    });
 };
 
-
-// Criar tareja
-const createTask = async(req, res) => {
-    const body = await getRequestBody (req);
-    const task = taskService.addTask (body.title);
+// Criar tarefas
+const createTask = async (req, res) => {
+    const body = await getRequestBody(req);
+    // Note que passamos title para o service
+    const tasks = taskService.addTask(body.title);
     
     res.statusCode = 201;
-    res.end(JSON.stringify(task));    
-
+    res.end(JSON.stringify(tasks));    
 };
 
-// Listar tarejas
+// Listar tarefas
 const listTasks = (req, res) => {
     const tasks = taskService.getTasks();
-
     res.statusCode = 200;
     res.end(JSON.stringify(tasks));    
-
 };
 
 // Atualizar tarefa
-
-const updateTask = async(req,res,id) => {
+const updateTask = async (req, res, id) => {
     const body = await getRequestBody(req);
+    // Aqui usamos o 'id' que já veio como parâmetro da função
+    const idNumber = parseInt(id); 
+    
+    const updatedTask = taskService.updateTask(idNumber, body);
 
-    const taks = taskService.updateTask(id, body.title);
-
-    if (!task ){
+    if (updatedTask) {
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: "Tarefa atualizada!", task: updatedTask }));
+    } else {
         res.statusCode = 404;
-        return res.end(JSON.stringify(
-            { message: 'Não encontrado' })
-        );
+        res.end(JSON.stringify({ message: "Tarefa não encontrada" }));
     }
-    res.end(JSON.stringify(task));
-
 };
 
 // Deletar tarefa
-
-const deleteTask = (req,res,id) => {
-    const sucess = taskService.deleteTask(id);
-
-    if(!sucess){
+const deleteTask = (req, res, id) => {
+    const idNumber = parseInt(id);
+    const success = taskService.deleteTask(idNumber);
+    
+    if (success) {
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: "Tarefa removida com sucesso!" }));
+    } else {
         res.statusCode = 404;
-        return res.end(JSON.stringify(
-            {  message:' Não encontrada 67' })
-        );
+        res.end(JSON.stringify({ message: "Erro: Tarefa não encontrada para remover." }));
     }
-    res.end(JSON.stringify( 
-        { message:' Removida ' })
-        );
 };
+
+// Procurar por ID
+const getTaskById = (req, res, id) => {
+    const idNumber = parseInt(id);
+    const task = taskService.getTaskById(idNumber);
+
+    if (task) {
+        res.statusCode = 200;
+        res.end(JSON.stringify(task));
+    } else {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: "Tarefa não encontrada" }));
+    }
+};
+
 module.exports = {
     createTask,
     listTasks,
     updateTask,
-    deleteTask
+    deleteTask,
+    getTaskById
 };
-
