@@ -31,4 +31,4 @@ O maior desafio aqui não foi só fazer a API funcionar, mas garantir que os dad
 Usei o **Postman** para testar tudo e ver os dados entrando e saindo!
 
 ### Demonstração do projeto
-![Assita o vídeo:](./video_api.mp4)
+[Assita o vídeo](./video_api.mp4)
